@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pacha Sunset | Barra Cholet 🍸</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="container">
+    <h1>PACHA SUNSET</h1>
+    <p class="subtitle">BARRA CHOLET - CONTROL DE INVENTARIO</p>
+
+    <div class="tab-controls">
+        <button id="btn-registros" class="tab-button active" onclick="showView('registros-view')">
+            📝 REGISTROS
+        </button>
+        <button id="btn-reporte" class="tab-button" onclick="showView('reporte-view')" disabled>
+            📈 VER REPORTE
+        </button>
+    </div>
+
+    <div id="registros-view" style="display: block;">
+
+        <h3 class="section-header">INVENTARIO POR BOTELLA 🍾</h3>
+        <div id="inventory-list">
+            </div>
+
+        <h3 class="section-header">VENTA POR UNIDAD (Shots/Vasos) 🍹</h3>
+        <div id="unit-sale-list">
+            </div>
+
+        <div id="cash-input-group">
+            <label for="cash-physical-input">INGRESO TOTAL DE CAJA (Físico - Bs)</label>
+            <input type="number" id="cash-physical-input" value="" min="0" placeholder="Ej: 28900" onchange="saveInputData('cash', 'physical', this.value)">
+        </div>
+
+        <div id="button-group">
+            <button id="calculate-button" onclick="calculateResults()">
+                CALCULAR CIERRE Y CUADRAR
+            </button>
+
+            <button id="clear-initial-button" onclick="clearAllData()">
+                🗑️ LIMPIAR DATOS
+            </button>
+        </div>
+    </div>
+
+    <div id="reporte-view">
+        <h3 style="color:var(--color-success); text-align:center;">DETALLE DE CIERRE Y CUADRE DE CAJA</h3>
+
+        <div id="report-units-list">
+             </div>
+
+        <div id="final-summary">
+            <p style="font-size:1.1em; color:var(--color-primary);">RESUMEN DEL CUADRE:</p>
+
+            <p class="summary-line">Total Teórico (Sistema): <span id="total-revenue-display-theoretical">Bs 0</span></p>
+            <p class="summary-line">Total Físico (Caja): <span id="total-physical-display">Bs 0</span></p>
+
+            <div id="cuadre-result" class="cuadra"></div>
+            <div id="discrepancy-analysis"></div>
+
+             <p id="total-revenue-display">Bs 0</p>
+        </div>
+    </div>
+</div>
+
+    <div id="toast-message">
+        ¡Datos limpiados! ✅
+    </div>
+
+    <script src="script.js"></script>
+    </body>
+    </html>

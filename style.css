@@ -1,0 +1,310 @@
+/* --- ESTILOS GENERALES (Mantenidos de tu código original) --- */
+:root {
+    --bg-dark: #1f2a38;     
+    --bg-card: #283443;     
+    --color-primary: #00bcd4; 
+    --color-secondary: #ff9800; 
+    --color-success: #4CAF50; 
+    --color-danger: #f44336;  
+    --color-text: #e0e0e0;
+    --color-neutral: #607d8b; /* Nuevo color para el campo de caja */
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: var(--bg-dark); 
+    color: var(--color-text);
+}
+
+.container {
+    max-width: 650px;
+    margin: 0 auto;
+    padding: 15px 10px;
+}
+
+h1 { color: var(--color-primary); text-align: center; margin-bottom: 5px; font-size: 1.8em; }
+.subtitle { color: var(--color-secondary); text-align: center; margin-bottom: 20px; font-size: 1em; font-weight: 500; }
+
+/* --- BOTONES DE NAVEGACIÓN (Tabs) --- */
+.tab-controls { display: flex; margin-bottom: 15px; gap: 10px; }
+.tab-button {
+    flex-grow: 1; padding: 12px; border: none; border-radius: 6px; cursor: pointer;
+    font-size: 1em; font-weight: bold; transition: background-color 0.3s, opacity 0.3s;
+    color: white;
+}
+
+#btn-registros { background-color: var(--color-secondary); }
+#btn-registros.active { box-shadow: 0 0 10px rgba(255, 152, 0, 0.8); }
+
+#btn-reporte { background-color: var(--color-success); opacity: 0.5; }
+#btn-reporte.active { opacity: 1; box-shadow: 0 0 10px rgba(76, 175, 80, 0.8); }
+#btn-reporte:disabled { cursor: not-allowed; }
+
+/* --- VISTA DE REGISTROS (Input View) --- */
+#registros-view { display: none; }
+
+/* Contenedores para separar inventario de botellas de venta por unidad */
+#inventory-list, #unit-sale-list { 
+    display: flex; 
+    flex-direction: column; 
+    gap: 5px; 
+    margin-bottom: 15px; 
+}
+
+.section-header {
+    color: var(--color-primary);
+    font-size: 1.2em;
+    margin-top: 15px;
+    margin-bottom: 5px;
+    padding-left: 5px;
+    border-bottom: 2px solid var(--color-secondary);
+}
+
+.product-item { background-color: var(--bg-card); padding: 10px; border-radius: 6px; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3); border-left: 3px solid var(--color-secondary); }
+
+/* Resalta los productos de venta por unidad */
+.unit-sale-item { 
+    border-left: 3px solid var(--color-primary); 
+    background-color: #2b384a; 
+}
+
+.product-header, .product-details { display: flex; justify-content: space-between; align-items: center; }
+.product-header { margin-bottom: 8px; font-weight: bold; }
+.price-tag { font-size: 0.9em; color: var(--color-secondary); font-weight: normal; }
+
+/* Ajuste de ancho para items de solo "Vendidas" */
+.input-item { display: flex; flex-direction: column; align-items: center; width: 20%; }
+.unit-sale-details .input-item { width: 40%; } /* Le da más espacio al campo de venta por unidad */
+
+.input-item label { font-size: 0.7em; color: #aaaaaa; margin-bottom: 2px; text-transform: uppercase; white-space: nowrap; }
+
+input[type="number"] {
+    width: 90%; padding: 5px 2px; border: none; border-radius: 4px; text-align: center;
+    font-size: 0.9em; background-color: #3f4a5a; color: var(--color-text); box-sizing: border-box;
+    -moz-appearance: textfield; 
+}
+
+/* Estilo para el input de solo "Vendidas" */
+.unit-sale-details input[type="number"] {
+     width: 100%;
+     border: 1px solid var(--color-primary);
+     color: var(--color-primary);
+}
+
+input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+
+.revenue-display { 
+    width: 35%; text-align: right; font-size: 0.9em; font-weight: bold; background-color: #3f4a5a; 
+    padding: 5px; border-radius: 4px; line-height: 1.2;
+}
+.revenue-display .units-sold { color: var(--color-primary); display: block; }
+.revenue-display .money-sold { color: var(--color-secondary); font-size: 1.1em; display: block; }
+
+/* Ajustes para el display de ingresos de venta por unidad */
+.unit-sale-details .revenue-display { width: 50%; } 
+.unit-sale-details .revenue-display .money-sold { color: var(--color-success); }
+
+
+/* --- GRUPO DE BOTONES (Mantenido) --- */
+#button-group {
+    display: flex;
+    justify-content: space-between; 
+    gap: 5px; 
+    margin-top: 15px;
+}
+
+#calculate-button, #clear-initial-button {
+    padding: 8px 10px; 
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9em; 
+    font-weight: bold;
+    flex-grow: 1; 
+    width: 50%; 
+    white-space: nowrap; 
+}
+
+#calculate-button {
+    background-color: var(--color-secondary); 
+    color: white; 
+    order: 1; 
+}
+#calculate-button:hover { background-color: #e68a00; }
+
+#clear-initial-button {
+    background-color: #607d8b; 
+    color: white; 
+    order: 2; 
+}
+#clear-initial-button:hover { background-color: #546e7a; }
+
+/* --- CAMPO DE INGRESO DE CAJA FÍSICA (NUEVO) --- */
+#cash-input-group {
+    background-color: #3f4a5a;
+    padding: 10px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 15px;
+    margin-top: 15px;
+    border-left: 4px solid var(--color-neutral);
+}
+#cash-input-group label {
+    font-weight: bold;
+    color: var(--color-text);
+    font-size: 0.9em;
+}
+#cash-input-group input {
+    width: 45%;
+    padding: 8px;
+    font-size: 1.1em;
+    text-align: right;
+    border: 1px solid var(--color-neutral);
+    color: var(--color-secondary);
+}
+
+/* --- VISTA DE REPORTE (Mantenido) --- */
+#reporte-view {
+    display: none;
+    padding: 10px;
+    background-color: var(--bg-card);
+    border-radius: 8px;
+    overflow-x: hidden; 
+}
+
+/* --- Estilos del Reporte (Mantenidos) --- */
+.report-header-row {
+    display: flex;
+    background-color: #3f4a5a;
+    font-weight: bold;
+    padding: 8px 0;
+    border-radius: 4px 4px 0 0;
+    margin-bottom: 5px;
+}
+.report-data-row {
+    display: flex;
+    background-color: var(--bg-dark);
+    border-bottom: 1px solid #3f4a5a;
+    padding: 8px 0;
+}
+.report-data-row:nth-child(even) {
+    background-color: #2c3a4a;
+}
+.report-cell {
+    padding: 0 5px;
+    text-align: center;
+}
+.col-producto { 
+    width: 28%; text-align: left; padding-left: 8px; font-weight: bold; color: var(--color-primary);
+    overflow-x: auto; -webkit-overflow-scrolling: touch; text-overflow: unset; white-space: nowrap; 
+}
+.col-producto::-webkit-scrollbar { width: 0px; height: 0px; background: transparent; }
+.col-producto { scrollbar-width: none; }
+.col-producto { -ms-overflow-style: none; }
+
+.col-vendido { width: 22%; color: var(--color-secondary); } 
+.col-regalo { width: 22%; color: var(--color-danger); } 
+.col-ingreso { width: 28%; font-weight: bold; color: var(--color-success); } 
+
+.total-summary-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-top: 2px solid var(--color-secondary);
+    margin-top: 15px;
+    font-weight: bold;
+}
+.total-summary-row .col-ingreso {
+    text-align: right;
+    padding-right: 5px;
+}
+
+/* --- Cuadre de Caja (Nuevos estilos) --- */
+#final-summary {
+    margin-top: 20px;
+    padding: 15px;
+    background-color: var(--bg-card);
+    border-radius: 8px;
+    text-align: center;
+    box-shadow: 0 0 10px rgba(76, 175, 80, 0.6); 
+}
+
+#cuadre-result {
+    font-weight: bold;
+    font-size: 1.3em;
+    padding: 10px 5px;
+    border-radius: 4px;
+    margin-top: 10px;
+}
+.cuadra { background-color: var(--color-success); color: white; }
+.falta { background-color: var(--color-danger); color: white; }
+.sobra { background-color: var(--color-secondary); color: var(--bg-dark); }
+
+#discrepancy-analysis {
+    font-size: 0.95em;
+    color: #ccc;
+    padding: 10px;
+    border: 1px solid #444;
+    border-radius: 4px;
+    margin-top: 10px;
+    text-align: left;
+    background-color: #1a232e;
+}
+
+/* Estilos para los totales de resumen del cuadre */
+.summary-line {
+    font-weight: bold;
+    margin: 5px 0;
+}
+#total-revenue-display-theoretical {
+    color: var(--color-success);
+    font-size: 1.2em;
+}
+#total-physical-display {
+    color: var(--color-secondary);
+    font-size: 1.2em;
+}
+#total-revenue-display {
+     /* Ocultado para que solo se vea el total teórico en el reporte */
+    display: none;
+}
+
+/* Estilos específicos para las líneas de totales en el reporte */
+.report-section-header {
+    font-size: 1em;
+    font-weight: bold;
+    color: var(--color-primary);
+    margin-top: 10px;
+    margin-bottom: 5px;
+    padding-left: 5px;
+}
+
+/* --- ESTILO DEL MODAL/TOAST (Mensaje de Confirmación) --- */
+#toast-message {
+    visibility: hidden; 
+    min-width: 250px;
+    background-color: var(--color-success);  
+    color: #fff;
+    text-align: center;
+    border-radius: 8px;
+    padding: 16px;
+    position: fixed;
+    z-index: 1;
+    left: 50%;
+    top: 50%; 
+    transform: translate(-50%, -50%); 
+    font-size: 1.1em;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+    opacity: 0;
+    transition: opacity 0.5s, top 0.5s;
+}
+
+#toast-message.show {
+    visibility: visible;
+    opacity: 1;
+    top: 45%; 
+}
