@@ -46,7 +46,113 @@
             font-weight: bold;
             font-size: 14px;
         }
+/* =========================
+   RESPONSIVE PARA CELULARES
+   ========================= */
+@media (max-width: 768px) {
 
+    body {
+        background: #eaeaea;
+    }
+
+    /* Botones */
+    .controles {
+        flex-wrap: wrap;
+        gap: 6px;
+        padding: 8px;
+    }
+
+    .btn-pdf, .btn-borrar {
+        flex: 1;
+        padding: 8px;
+        font-size: 14px;
+    }
+
+    /* Documento deja de ser A4 fijo */
+    #documento {
+        width: 100%;
+        min-height: auto;
+        padding: 8px;
+    }
+
+    /* Header */
+    h1 {
+        font-size: 18px !important;
+        letter-spacing: 2px !important;
+    }
+
+    .header-info {
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .campo {
+        font-size: 12px;
+    }
+
+    /* Tablas en columna */
+    .tablas-flex {
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .col-izq {
+        width: 100%;
+    }
+
+    /* Scroll horizontal para tablas grandes */
+    table {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+
+    th, td {
+        font-size: 10px;
+    }
+
+    /* Inputs más cómodos */
+    input {
+        font-size: 12px;
+    }
+
+    .input-entrega {
+        width: 22%;
+        font-size: 11px;
+    }
+
+    /* Tabla de resumen */
+    .res-table {
+        min-width: 100%;
+    }
+
+    .total-etiqueta {
+        font-size: 14px;
+    }
+
+    .total-celda {
+        font-size: 18px;
+        height: 40px;
+    }
+}
+
+/* =========================
+   EXTRA: celulares chicos
+   ========================= */
+@media (max-width: 480px) {
+
+    h1 {
+        font-size: 16px !important;
+    }
+
+    th, td {
+        font-size: 9px;
+    }
+
+    .total-celda {
+        font-size: 16px;
+    }
+}
         .total-celda { 
             /* Esta es la celda del monto (Bs) */
             border-left: 1.2px solid #000 !important;   /* Línea izquierda que sube */
