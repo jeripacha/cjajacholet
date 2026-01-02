@@ -3,73 +3,303 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pacha Sunset | Barra Cholet 🍸</title>
-    <link rel="stylesheet" href="style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <style>
+        body { font-family: 'Arial', sans-serif; margin: 0; padding: 0; background-color: #f4f4f9; }
+        .controles { padding: 10px; text-align: center; background: #222; position: sticky; top: 0; z-index: 100; display: flex; justify-content: center; gap: 10px; }
+        .btn-pdf { padding: 10px 20px; background-color: #d32f2f; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        .btn-borrar { padding: 10px 20px; background-color: #616161; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
+
+        #documento { 
+            width: 210mm; background: white; margin: 0 auto; padding: 5mm 10mm; box-sizing: border-box;
+            min-height: 270mm; display: flex; flex-direction: column;
+        }
+
+        .header-info { display: flex; justify-content: space-between; margin-bottom: 10px; gap: 10px; }
+        .campo { font-size: 12px; font-weight: bold; display: flex; align-items: flex-end; flex: 1; }
+        .input-header { border: none; border-bottom: 1px solid #000; width: 100%; font-size: 12px; padding-left: 5px; outline: none; }
+
+        .tablas-flex { display: flex; gap: 15px; align-items: flex-start; justify-content: space-between; flex-grow: 1; }
+        .col-izq { display: flex; flex-direction: column; width: 350px; }
+        .espacio-medio { margin-top: 15px; }
+
+        table { border-collapse: collapse; border: 1.2px solid #000; width: 100%; table-layout: fixed; }
+        th { background-color: #eee; font-weight: bold; font-size: 10px; height: 20px; border: 1px solid #000; }
+        td { border: 1px solid #000; padding: 0; text-align: center; font-size: 10px; height: 17px; box-sizing: border-box; }
+
+        .prod-col { text-align: left; padding-left: 5px; width: 130px; overflow: hidden; white-space: nowrap; }
+        .multi-cont { display: flex; width: 100%; height: 100%; }
+        .input-entrega { width: 20%; height: 100%; border: none; border-right: 1px solid #000; text-align: center; font-size: 10px; padding: 0; }
+        .input-entrega:last-child { border-right: none; }
+        .input-dev, .input-venta { width: 100%; height: 100%; border: none; text-align: center; font-size: 11px; font-weight: bold; background: transparent; }
+
+        .res-table { min-width: 390px; }
+
+        /* SOLUCIÓN: CONECTAR CELDA TOTAL CON LA DE ARRIBA */
+        .total-fila td { 
+            border: none; /* Quitamos bordes por defecto */
+        }
+
+        .total-etiqueta {
+            text-align: right;
+            padding-right: 10px;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .total-celda { 
+            /* Esta es la celda del monto (Bs) */
+            border-left: 1.2px solid #000 !important;   /* Línea izquierda que sube */
+            border-right: 1.2px solid #000 !important;  /* Línea derecha que sube */
+            border-bottom: 1.2px solid #000 !important; /* Línea de base */
+            border-top: 1.2px solid #000 !important;    /* Línea que conecta con la de arriba */
+            font-size: 18px; 
+            background-color: #fffde7; 
+            height: 35px; 
+            font-weight: bold;
+        }
+
+        input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        input[type=number] { -moz-appearance: textfield; }
+    </style>
 </head>
 <body>
-<div class="container">
-    <h1>PACHA SUNSET</h1>
-    <p class="subtitle">BARRA CHOLET - CONTROL DE INVENTARIO</p>
 
-    <div class="tab-controls">
-        <button id="btn-registros" class="tab-button active" onclick="showView('registros-view')">
-            📝 REGISTROS
-        </button>
-        <button id="btn-reporte" class="tab-button" onclick="showView('reporte-view')" disabled>
-            📈 VER REPORTE
-        </button>
+    <div class="controles">
+        <button class="btn-pdf" onclick="descargarPDF()">Generar PDF</button>
+        <button class="btn-borrar" onclick="borrarTodo()">Limpiar</button>
     </div>
 
-    <div id="registros-view" style="display: block;">
+    <div id="documento">
+        <div style="text-align: center; margin-bottom: 8px;">
+            <h1 style="margin: 0; letter-spacing: 3px; font-size: 22px;">PACHA SUNSET</h1>
+            <p style="margin: 0; font-size: 11px; font-weight: bold;">CONTROL DE CAJA Y SUMINISTROS</p>
+        </div>
 
-        <h3 class="section-header">INVENTARIO POR BOTELLA 🍾</h3>
-        <div id="inventory-list">
+        <div class="header-info">
+            <div class="campo">CAJERO: <input type="text" id="cajero" class="input-header" oninput="guardarDatos()"></div>
+            <div class="campo">BARRA: <input type="text" id="barra" class="input-header" oninput="guardarDatos()"></div>
+            <div class="campo">FECHA: <input type="text" id="fecha" class="input-header" oninput="guardarDatos()"></div>
+        </div>
+
+        <div class="tablas-flex">
+            <div class="col-izq">
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width:130px">PRODUCTO</th>
+                            <th style="width:140px">ENTREGAS</th>
+                            <th style="width:40px">DEV.</th>
+                            <th style="width:30px">UTI.</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabla-body"></tbody>
+                    <tbody id="filas-vacias"></tbody>
+                </table>
+                <div class="espacio-medio"></div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th colspan="2">VENTAS DIRECTAS</th>
+                            <th style="width: 70px;">CANT.</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ventas-directas-body"></tbody>
+                </table>
             </div>
 
-        <h3 class="section-header">VENTA POR UNIDAD (Shots/Vasos) 🍹</h3>
-        <div id="unit-sale-list">
-            </div>
-
-        <div id="cash-input-group">
-            <label for="cash-physical-input">INGRESO TOTAL DE CAJA (Físico - Bs)</label>
-            <input type="number" id="cash-physical-input" value="" min="0" placeholder="Ej: 28900" onchange="saveInputData('cash', 'physical', this.value)">
-        </div>
-
-        <div id="button-group">
-            <button id="calculate-button" onclick="calculateResults()">
-                CALCULAR CIERRE Y CUADRAR
-            </button>
-
-            <button id="clear-initial-button" onclick="clearAllData()">
-                🗑️ LIMPIAR DATOS
-            </button>
-        </div>
-    </div>
-
-    <div id="reporte-view">
-        <h3 style="color:var(--color-success); text-align:center;">DETALLE DE CIERRE Y CUADRE DE CAJA</h3>
-
-        <div id="report-units-list">
-             </div>
-
-        <div id="final-summary">
-            <p style="font-size:1.1em; color:var(--color-primary);">RESUMEN DEL CUADRE:</p>
-
-            <p class="summary-line">Total Teórico (Sistema): <span id="total-revenue-display-theoretical">Bs 0</span></p>
-            <p class="summary-line">Total Físico (Caja): <span id="total-physical-display">Bs 0</span></p>
-
-            <div id="cuadre-result" class="cuadra"></div>
-            <div id="discrepancy-analysis"></div>
-
-             <p id="total-revenue-display">Bs 0</p>
+            <table class="res-table">
+                <thead>
+                    <tr>
+                        <th style="width:170px">DETALLE VENTAS (COMBOS Y OTROS)</th>
+                        <th>CANT.</th>
+                        <th>PRECIO</th>
+                        <th>SUBTOTAL</th>
+                    </tr>
+                </thead>
+                <tbody id="resumen-body">
+                    </tbody>
+                <tfoot>
+                    <tr class="total-fila">
+                        <td colspan="3" class="total-etiqueta">TOTAL CAJA:</td>
+                        <td id="gran-total" class="total-celda"></td>
+                    </tr>
+                </tfoot>
+            </table>
         </div>
     </div>
-</div>
 
-    <div id="toast-message">
-        ¡Datos limpiados! ✅
-    </div>
+    <script>
+        const productos = [
+            { id: "f_buhero", nombre: "Fernet buhero", precio: 350 }, { id: "f_branca", nombre: "Fernet branca", precio: 400 },
+            { id: "h_reserva", nombre: "Havana reserva", precio: 350 }, { id: "parrales", nombre: "Parrales", precio: 320 },
+            { id: "viuda", nombre: "Viuda", precio: 300 }, { id: "jager", nombre: "Jager", precio: 490 },
+            { id: "vodka", nombre: "Vodka", precio: 380 }, { id: "jw_black", nombre: "JW Black 750ml", precio: 650 },
+            { id: "tequila_jc", nombre: "Tequila Jose Cuervo", precio: 450 },
+            { id: "g_amaz", nombre: "Gin amazonico", precio: 450 }, { id: "g_frut", nombre: "Gin frutilla", precio: 450 }, 
+            { id: "g_bosq", nombre: "Gin frutos del bosque", precio: 450 }, { id: "g_andin", nombre: "Gin andino", precio: 450 }, 
+            { id: "corona", nombre: "Corona", precio: 30 }, { id: "huari", nombre: "Huari", precio: 30 }, 
+            { id: "coca", nombre: "Cocacola 2l", precio: 30 }, { id: "pomelo", nombre: "Pomelo", precio: 30 }, 
+            { id: "schwepp", nombre: "Schweppes", precio: 20 }, { id: "tonica", nombre: "Agua tonica", precio: 15 }, 
+            { id: "monster", nombre: "Monster", precio: 35 }, { id: "agua_p", nombre: "Agua pequeña", precio: 15 }, 
+            { id: "agua_2l", nombre: "Agua 2L", precio: 30 },
+            { id: "s_mara", nombre: "Sens maracuya", precio: 30 }, { id: "s_aran", nombre: "Sens arandano", precio: 30 }, 
+            { id: "s_limo", nombre: "Sens limon", precio: 30 }, { id: "s_cere", nombre: "Sens cereza", precio: 30 }, 
+            { id: "c2_gr", nombre: "2 click grande", precio: 30 }, { id: "c1_gr", nombre: "1 click grande", precio: 30 }, 
+            { id: "c2_peq", nombre: "2 click pequeño", precio: 25 }, { id: "c1_peq", nombre: "1 click pequeño", precio: 25 }, 
+            { id: "encend", nombre: "Encendedor", precio: 5 }, { id: "f_ca5", nombre: "Flor de caña 5", precio: 300 }, 
+            { id: "f_ca7", nombre: "Flor de caña 7", precio: 350 }
+        ];
 
-    <script src="script.js"></script>
-    </body>
-    </html>
+        const ventasDirectas = [
+            { id: "v_shots", nombre: "Shots", precio: 30 }, { id: "v_jagerb", nombre: "Jager Boom", precio: 60 },
+            { id: "v_clasicos", nombre: "Clásicos", precio: 35 }, { id: "v_canelazo", nombre: "Canelazo", precio: 40 },
+            { id: "v_marager", nombre: "Maracuyager", precio: 40 }, { id: "v_pachajito", nombre: "Pachajito", precio: 35 },
+            { id: "v_llamita", nombre: "Llamita", precio: 35 }, { id: "v_mocochinchi", nombre: "Mocochinchi Bomb", precio: 25 }
+        ];
+
+        const combos = [
+            { id: "c_branca", nombre: "Combo Fernet Branca", base: "f_branca", mix: "coca", precio: 400 },
+            { id: "c_buhero", nombre: "Combo Fernet Buhero", base: "f_buhero", mix: "coca", precio: 380 },
+            { id: "c_havana", nombre: "Combo Havana Reserva", base: "h_reserva", mix: "coca", precio: 350 },
+            { id: "c_parrales", nombre: "Combo Parrales", base: "parrales", mix: "schwepp", precio: 320 },
+            { id: "c_viuda", nombre: "Combo Viuda", base: "viuda", mix: "schwepp", precio: 400 },
+            { id: "c_vodka", nombre: "Combo Vodka", base: "vodka", mix: "pomelo", precio: 380 },
+            { id: "c_jwblack", nombre: "Combo JW Black (+Agua 2L)", base: "jw_black", mix: "agua_2l", cantMix: 1, precio: 750 },
+            { id: "c_f5", nombre: "Combo Flor de Caña 5", base: "f_ca5", mix: "coca", precio: 350 },
+            { id: "c_f7", nombre: "Combo Flor de Caña 7", base: "f_ca7", mix: "coca", precio: 390 },
+            { id: "c_jager", nombre: "Combo Jager (+2 Mon)", base: "jager", mix: "monster", cantMix: 2, precio: 490 },
+            { id: "cg_amaz", nombre: "Combo Gin Amazonico", base: "g_amaz", mix: "tonica", cantMix: 2, precio: 450 },
+            { id: "cg_frut", nombre: "Combo Gin Frutilla", base: "g_frut", mix: "tonica", cantMix: 2, precio: 450 },
+            { id: "cg_bosq", nombre: "Combo Gin F. Bosque", base: "g_bosq", mix: "tonica", cantMix: 2, precio: 450 },
+            { id: "cg_andin", nombre: "Combo Gin Andino", base: "g_andin", mix: "tonica", cantMix: 2, precio: 450 }
+        ];
+
+        function inicializar() {
+            const tbodyInv = document.getElementById('tabla-body');
+            productos.forEach(p => {
+                tbodyInv.innerHTML += `<tr id="row-${p.id}">
+                    <td class="prod-col">${p.nombre}</td>
+                    <td><div class="multi-cont">${Array(5).fill(0).map(() => `<input type="number" class="input-entrega" oninput="manejarInput()">`).join('')}</div></td>
+                    <td class="td-dev"><input type="number" class="input-dev" oninput="manejarInput()"></td>
+                    <td class="td-uti" id="uti-${p.id}"></td>
+                </tr>`;
+            });
+
+            const tbodyVacios = document.getElementById('filas-vacias');
+            for(let i=1; i<=4; i++){
+                tbodyVacios.innerHTML += `<tr>
+                    <td class="prod-col"><input type="text" placeholder="..." style="width:100%; border:none; font-size:10px; outline:none;"></td>
+                    <td><div class="multi-cont">${Array(5).fill(0).map(() => `<input type="number" class="input-entrega">`).join('')}</div></td>
+                    <td><input type="number" class="input-dev"></td>
+                    <td style="background:#f0f0f0;"></td>
+                </tr>`;
+            }
+
+            const tbodyVentas = document.getElementById('ventas-directas-body');
+            ventasDirectas.forEach(v => {
+                tbodyVentas.innerHTML += `<tr><td class="prod-col">${v.nombre}</td><td style="width:50px; background:#f9f9f9;">${v.precio} Bs</td><td><input type="number" class="input-venta" id="vd-${v.id}" oninput="manejarInput()"></td></tr>`;
+            });
+
+            const tbodyRes = document.getElementById('resumen-body');
+            combos.forEach(c => { 
+                tbodyRes.innerHTML += `<tr id="res-${c.id}"><td>${c.nombre}</td><td class="c-cant"></td><td>${c.precio}</td><td class="c-sub"></td></tr>`; 
+            });
+            const idsBasesCombos = combos.flatMap(c => Array.isArray(c.base) ? c.base : [c.base]);
+            productos.forEach(p => { 
+                if (!idsBasesCombos.includes(p.id)) {
+                    tbodyRes.innerHTML += `<tr id="res-s-${p.id}"><td>${p.nombre}</td><td class="c-cant"></td><td>${p.precio}</td><td class="c-sub"></td></tr>`; 
+                }
+            });
+            cargarDatos();
+        }
+
+        function manejarInput() { calcular(); guardarDatos(); }
+
+        function calcular() {
+            let utiReal = {}; let total = 0;
+            productos.forEach(p => {
+                const row = document.getElementById("row-" + p.id);
+                let ent = 0; row.querySelectorAll('.input-entrega').forEach(i => { if(i.value!="") ent+=Number(i.value); });
+                let dev = Number(row.querySelector('.input-dev').value) || 0;
+                utiReal[p.id] = Math.max(0, ent - dev);
+                document.getElementById("uti-"+p.id).innerText = (ent===0 && row.querySelector('.input-dev').value==="") ? "" : utiReal[p.id];
+            });
+            let copia = {...utiReal};
+            combos.forEach(c => {
+                let n = 0;
+                if(Array.isArray(c.base)) { c.base.forEach(b => { n+=copia[b]; copia[b]=0; }); }
+                else { n=copia[c.base] || 0; copia[c.base]=0; }
+                if(n>0) {
+                    let mixUsado = n * (c.cantMix||1);
+                    if(copia[c.mix] !== undefined) copia[c.mix] = Math.max(0, copia[c.mix] - mixUsado);
+                }
+                document.getElementById("res-"+c.id).querySelector('.c-cant').innerText = n||"";
+                document.getElementById("res-"+c.id).querySelector('.c-sub').innerText = n?(n*c.precio):"";
+                total += (n*c.precio);
+            });
+            const idsBasesCombos = combos.flatMap(c => Array.isArray(c.base) ? c.base : [c.base]);
+            productos.forEach(p => {
+                if (!idsBasesCombos.includes(p.id)) {
+                    let s = copia[p.id] || 0;
+                    document.getElementById("res-s-"+p.id).querySelector('.c-cant').innerText = s||"";
+                    document.getElementById("res-s-"+p.id).querySelector('.c-sub').innerText = s?(s*p.precio):"";
+                    total += (s*p.precio);
+                }
+            });
+            ventasDirectas.forEach(v => {
+                let cant = Number(document.getElementById("vd-"+v.id).value) || 0;
+                total += (cant * v.precio);
+            });
+            document.getElementById('gran-total').innerText = total > 0 ? total + " Bs." : "";
+        }
+
+        function guardarDatos() {
+            const data = {
+                header: { cajero: document.getElementById('cajero').value, barra: document.getElementById('barra').value, fecha: document.getElementById('fecha').value },
+                suministros: {}, ventasDirectas: {}
+            };
+            productos.forEach(p => {
+                const row = document.getElementById("row-" + p.id);
+                data.suministros[p.id] = { entregas: Array.from(row.querySelectorAll('.input-entrega')).map(i => i.value), devolucion: row.querySelector('.input-dev').value };
+            });
+            ventasDirectas.forEach(v => { data.ventasDirectas[v.id] = document.getElementById("vd-"+v.id).value; });
+            localStorage.setItem('pacha_vFinal_Full', JSON.stringify(data));
+        }
+
+        function cargarDatos() {
+            const stored = localStorage.getItem('pacha_vFinal_Full');
+            if (!stored) return;
+            const data = JSON.parse(stored);
+            document.getElementById('cajero').value = data.header.cajero || "";
+            document.getElementById('barra').value = data.header.barra || "";
+            document.getElementById('fecha').value = data.header.fecha || "";
+            productos.forEach(p => {
+                if (data.suministros[p.id]) {
+                    const row = document.getElementById("row-" + p.id);
+                    const inputs = row.querySelectorAll('.input-entrega');
+                    data.suministros[p.id].entregas.forEach((v, i) => inputs[i].value = v);
+                    row.querySelector('.input-dev').value = data.suministros[p.id].devolucion;
+                }
+            });
+            ventasDirectas.forEach(v => { if(data.ventasDirectas[v.id]) document.getElementById("vd-"+v.id).value = data.ventasDirectas[v.id]; });
+            calcular();
+        }
+
+        function borrarTodo() { if (confirm("¿Limpiar?")) { localStorage.removeItem('pacha_vFinal_Full'); location.reload(); } }
+
+        function descargarPDF() {
+            const element = document.getElementById('documento');
+            const opt = {
+                margin: [5, 0, 5, 0],
+                filename: 'Pacha_Sunset_Caja.pdf',
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2, useCORS: true, letterRendering: true },
+                jsPDF: { unit: 'mm', format: 'letter', orientation: 'portrait' }
+            };
+            html2pdf().set(opt).from(element).save();
+        }
+        inicializar();
+    </script>
+</body>
+</html>
